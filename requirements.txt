@@ -1,0 +1,24 @@
+
+# Numerical computing
+numpy==1.26.4
+scipy>=1.13
+pandas>=2.2
+
+# Computer vision and YOLO
+opencv-python>=4.10
+ultralytics>=8.3
+Pillow>=10.4
+
+# Machine learning and PCA
+scikit-learn>=1.5
+
+# Matrix operations and Riemannian geometry
+geomstats>=2.8
+
+# Visualization and evaluation
+matplotlib>=3.9
+seaborn>=0.13
+
+# Utilities
+tqdm>=4.66
+joblib>=1.4
