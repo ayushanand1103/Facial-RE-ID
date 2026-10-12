@@ -1,5 +1,5 @@
-from src.camera import start_cam
+from src.workflow import main
 
 
 if __name__ == "__main__":
-    start_cam()
+    main()

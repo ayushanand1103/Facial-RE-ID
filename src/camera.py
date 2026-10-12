@@ -1,7 +1,8 @@
 import cv2
 
 
-def start_cam(camera_index=0):
+def open_camera(camera_index=0):
+    """Return an opened camera and its first frame; release failed candidates."""
     camera = None
     frame = None
     # Try the Windows DirectShow backend, then OpenCV's default backend.
@@ -22,6 +23,11 @@ def start_cam(camera_index=0):
             "desktop apps to access the camera, or try start_cam(camera_index=1)."
         )
 
+    return camera, frame
+
+
+def start_cam(camera_index=0):
+    camera, frame = open_camera(camera_index)
     try:
         print("Camera opened. Click the video window and press Q to quit.")
         while True:

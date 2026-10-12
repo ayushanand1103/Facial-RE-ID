@@ -10,3 +10,7 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Enrollment images and learned identity galleries
+data/
+models/gallery*.npz
