@@ -36,8 +36,8 @@ class FaceMatcher:
         if labels.shape != (len(faces),) or np.any(labels == "") or np.any(np.char.lower(labels) == "unknown"):
             raise ValueError("Provide one nonempty identity label per face")
         identities, counts = np.unique(labels, return_counts=True)
-        if len(identities) < 2 or counts.min() < 3:
-            raise ValueError("Enroll at least two identities, with at least three faces each")
+        if counts.min() < 3:
+            raise ValueError("Enroll at least three faces per identity")
         self.labels = labels
         self.training_hashes = [self._fingerprint(face) for face in faces]
         self.pca.fit(faces.reshape(len(faces), -1))

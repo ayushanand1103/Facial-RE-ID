@@ -110,7 +110,14 @@ class MathTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             FaceMatcher(alpha=2)
         with self.assertRaises(ValueError):
-            FaceMatcher().fit(faces[:3], labels[:3])
+            FaceMatcher().fit(faces[:2], labels[:2])
+
+    def test_single_identity_gallery(self):
+        faces, labels = synthetic_faces(count=3)
+        matcher = FaceMatcher(n_components=2).fit(faces[:3], labels[:3])
+        self.assertEqual(matcher.match(faces[0])["identity"], labels[0])
+        self.assertEqual(matcher.match(faces[0], threshold=0)["closest_identity"], labels[0])
+        self.assertEqual(matcher.match(np.zeros((64, 64)), threshold=0)["identity"], "Unknown")
 
     def test_png_dataset_loading(self):
         import cv2

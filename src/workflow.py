@@ -53,6 +53,19 @@ def draw_box(frame, bbox, label, color=(0, 255, 0)):
                 cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2)
 
 
+def save_query(frame, results, directory):
+    """Save a clean failing frame and scores for reproducible diagnosis."""
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"query_{uuid.uuid4().hex}.jpg"
+    if not cv2.imwrite(str(path), frame):
+        raise OSError(f"Could not save query: {path}")
+    path.with_suffix(".json").write_text(json.dumps(results, indent=2), encoding="utf-8")
+    print(f"Saved query: {path}", flush=True)
+    print(json.dumps(results, indent=2), flush=True)
+    return path
+
+
 def enroll(args):
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", args.name) or args.name.lower() == "unknown":
         raise ValueError("Use a name of 1–64 letters/digits/_/-; 'Unknown' is reserved")
@@ -121,6 +134,9 @@ def identify(args):
     detector = FaceDetector(args.model, args.confidence, args.device)
     preprocessor = FacePreprocessor()
     print(f"Unknown threshold status: {matcher.calibration['status']}", flush=True)
+    if matcher.calibration["status"] != "held-out":
+        print("Threshold has no unknown-person validation. False matches are possible; "
+              "capture separate known and unknown validation faces before calibration.", flush=True)
 
     def recognize(frame):
         results = []
@@ -135,7 +151,7 @@ def identify(args):
         print(json.dumps(recognize(read_image(args.image)), indent=2))
         return
     camera, frame = open_camera(args.camera)
-    print("Click the recognition window and press Q to quit.", flush=True)
+    print("Click the recognition window: S saves a query and scores; Q quits.", flush=True)
     try:
         while True:
             results = recognize(frame)
@@ -143,9 +159,14 @@ def identify(args):
             for result in results:
                 color = (0, 0, 255) if result["identity"] == "Unknown" else (0, 255, 0)
                 draw_box(display, result["bbox"], f"{result['identity']} | D={result['score']:.3f}", color)
+            cv2.putText(display, f"Threshold: {matcher.calibration['status']} | S: save query | Q: quit",
+                        (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 255), 2)
             cv2.imshow("Facial Re-ID | Recognition", display)
-            if cv2.waitKey(1) & 0xFF == ord("q"):
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord("q"):
                 break
+            if key == ord("s"):
+                save_query(frame, results, args.data / "queries")
             success, frame = camera.read()
             if not success or frame is None:
                 raise RuntimeError("Camera stopped delivering frames")

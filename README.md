@@ -27,7 +27,7 @@ For image input:
 .\venv\Scripts\python.exe main.py enroll --name Ayush --images photo1.jpg photo2.jpg photo3.jpg
 ```
 
-Training requires at least two identities and three samples per identity; ten or more
+Training supports a single identity and requires three samples per identity; ten or more
 distinct samples per identity are preferable for this prototype. Crops are stored as
 `data/train/<identity>/<unique-id>.png`. Source frames are not stored.
 
@@ -49,6 +49,9 @@ changes; the previous calibration is replaced by a provisional threshold.
 ```
 
 Live recognition draws an identity and fused distance for each face; press **Q** to close.
+If a face is misidentified, press **S** to save the clean query frame and matching scores
+in `data/queries/`. These captures are for diagnosis, not automatically enrolled training
+data. Use the correct label and a validation split when enrolling a saved query.
 The image command prints JSON results; an empty list means no face was detected.
 Lower scores mean a closer match, not a probability. `--threshold 1.0` overrides the
 stored acceptance threshold for an experiment. `--camera 1` selects another camera;

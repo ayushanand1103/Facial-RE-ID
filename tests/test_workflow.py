@@ -11,10 +11,21 @@ import cv2
 import numpy as np
 
 from src.matcher import FaceMatcher
-from src.workflow import main
+from src.workflow import main, save_query
 
 
 class WorkflowTests(unittest.TestCase):
+    def test_query_snapshot_preserves_frame_and_matching_scores(self):
+        import json
+        frame = np.full((80, 100, 3), 120, dtype=np.uint8)
+        results = [{"identity": "Archana", "score": 1.1, "threshold": 1.8,
+                    "bbox": (10, 10, 60, 60)}]
+        with tempfile.TemporaryDirectory() as directory, contextlib.redirect_stdout(io.StringIO()):
+            path = save_query(frame, results, directory)
+            self.assertEqual(cv2.imread(str(path)).shape, frame.shape)
+            self.assertEqual(json.loads(path.with_suffix(".json").read_text())[0]["identity"], "Archana")
+            np.testing.assert_array_equal(frame, np.full((80, 100, 3), 120, dtype=np.uint8))
+
     def test_image_enrollment_training_recognition_and_evaluation(self):
         rng = np.random.default_rng(12)
         with tempfile.TemporaryDirectory() as temporary:
